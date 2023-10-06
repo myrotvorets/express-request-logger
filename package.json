@@ -1,7 +1,7 @@
 {
   "name": "@myrotvorets/express-request-logger",
   "description": "HTTP request logger middleware for Express",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "type": "module",
   "typings": "./dist/src/index.d.mts",
   "exports": "./dist/src/index.mjs",
@@ -13,7 +13,13 @@
     "lint": "eslint -f gha .",
     "prepack": "npm run build"
   },
-  "keywords": ["http", "express", "logger", "middleware", "morgan"],
+  "keywords": [
+    "http",
+    "express",
+    "logger",
+    "middleware",
+    "morgan"
+  ],
   "author": "Myrotvorets <support@myrotvorets.center> (https://myrotvorets.center/)",
   "license": "MIT",
   "files": [
