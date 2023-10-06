@@ -1,0 +1,63 @@
+name: SonarCloud Analysis
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name && github.event.sender.login != 'dependabot[bot]' ||
+      github.event_name == 'push' && !contains(github.event.head_commit.message, '[ci skip]')
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
+        with:
+          disable-sudo: true
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            ea6ne4j2sb.execute-api.eu-central-1.amazonaws.com
+            github.com:443
+            pipelinesghubeus23.actions.githubusercontent.com:443
+            registry.npmjs.org:443
+            sc-cleancode-sensorcache-eu-central-1-prod.s3.amazonaws.com:443
+            scanner.sonarcloud.io:443
+            sonarcloud.io:443
+            codecov.io:443
+            storage.googleapis.com:443
+
+      - name: Check out the source code
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+        with:
+          fetch-depth: 0
+
+      - name: Run SonarCloud analysis
+        uses: myrotvorets/composite-actions/node-sonarscan@master
+        with:
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+          test-script: 'test:coverage'
+
+      - name: Install codecov
+        run: npm i -g codecov
+
+      - name: Rebuild the project with sourcemaps
+        run: npm run build -- --sourcemap
+
+      - name: Run codecov
+        run: codecov
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

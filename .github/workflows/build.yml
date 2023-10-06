@@ -1,0 +1,46 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+permissions:
+  contents: none
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.head_commit.message, '[ci skip]') || github.event_name == 'workflow_dispatch' }}
+    strategy:
+      matrix:
+        node:
+          - { name: Current,      version: current }
+          - { name: LTS,          version: lts/* }
+          - { name: Previous LTS, version: lts/-1 }
+    name: Build and test (Node ${{ matrix.node.name }})
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
+        with:
+          disable-sudo: true
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            nodejs.org:443
+            registry.npmjs.org:443
+
+      - name: Build and test
+        uses: myrotvorets/composite-actions/build-test-nodejs@master
+        with:
+          node-version: ${{ matrix.node.version }}
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
