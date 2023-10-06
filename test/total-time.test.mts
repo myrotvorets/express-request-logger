@@ -1,6 +1,7 @@
 import { hrtime } from 'node:process';
 import { expect } from 'chai';
 import request from 'supertest';
+import type { Response } from 'express';
 import { app, beforeSuite, beforeTest, genericHandler, stream } from './helpers/setup.mjs';
 import { requestLogger } from '../src/index.mjs';
 
@@ -49,7 +50,7 @@ describe(':total-time', function () {
                 stream,
             }),
             (_req, res, next) => {
-                delete res.locals._hrl_start_time;
+                delete (res as Response).locals._hrl_start_time;
                 next();
             },
             genericHandler,
@@ -67,7 +68,7 @@ describe(':total-time', function () {
                 stream,
             }),
             (_req, res, next) => {
-                res.locals._hrl_start_time = 'borked';
+                (res as Response).locals._hrl_start_time = 'borked';
                 next();
             },
             genericHandler,
