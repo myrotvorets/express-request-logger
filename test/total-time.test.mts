@@ -50,7 +50,8 @@ describe(':total-time', function () {
                 stream,
             }),
             (_req, res, next) => {
-                delete (res as Response).locals._hrl_start_time;
+                // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+                delete (res as Response).locals['_hrl_start_time'];
                 next();
             },
             genericHandler,
@@ -68,7 +69,7 @@ describe(':total-time', function () {
                 stream,
             }),
             (_req, res, next) => {
-                (res as Response).locals._hrl_start_time = 'borked';
+                (res as Response).locals['_hrl_start_time'] = 'borked';
                 next();
             },
             genericHandler,

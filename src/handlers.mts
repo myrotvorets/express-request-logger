@@ -42,7 +42,7 @@ export const remoteUserHandler: TokenHandler = (req) => {
     if (auth) {
         const match = re.exec(auth);
         if (match) {
-            const credentials = Buffer.from(match[1], 'base64').toString().split(':', 2);
+            const credentials = Buffer.from(match[1]!, 'base64').toString().split(':', 2);
             return credentials.length === 2 ? credentials[0] : undefined;
         }
     }
@@ -63,11 +63,11 @@ export const resHandler: TokenHandler = (_req, res, param) => {
 export const statusHandler: TokenHandler = (_req, res) => (res.headersSent ? res.statusCode.toString() : undefined);
 
 export const totalTimeHandler: TokenHandler = (_req, res) => {
-    if (res.locals._hrl_start_time) {
+    if (res.locals['_hrl_start_time']) {
         const now = hrtime.bigint();
-        const start = res.locals._hrl_start_time as unknown;
+        const start = res.locals['_hrl_start_time'] as unknown;
         if (typeof start === 'bigint') {
-            const diff = now - (res.locals._hrl_start_time as bigint);
+            const diff = now - (res.locals['_hrl_start_time'] as bigint);
             return Number(diff / BigInt(1e6)).toFixed(3);
         }
     }
