@@ -30,21 +30,21 @@ export type TokenHandler<
     arg: string | undefined,
 ) => string | undefined;
 
-const tokens: Record<string, TokenHandler> = {
-    date: dateHandler,
-    'http-version': httpVersionHandler,
-    method: methodHandler,
-    referer: referrerHandler,
-    referrer: referrerHandler,
-    'remote-addr': remoteAddrHandler,
-    'remote-user': remoteUserHandler,
-    req: reqHandler,
-    res: resHandler,
-    status: statusHandler,
-    'total-time': totalTimeHandler,
-    url: urlHandler,
-    'user-agent': userAgentHandler,
-};
+const tokens = new Map<string, TokenHandler>([
+    ['date', dateHandler],
+    ['http-version', httpVersionHandler],
+    ['method', methodHandler],
+    ['referer', referrerHandler],
+    ['referrer', referrerHandler],
+    ['remote-addr', remoteAddrHandler],
+    ['remote-user', remoteUserHandler],
+    ['req', reqHandler],
+    ['res', resHandler],
+    ['status', statusHandler],
+    ['total-time', totalTimeHandler],
+    ['url', urlHandler],
+    ['user-agent', userAgentHandler],
+]);
 
 export type BeforeLogHook<
     P = ParamsDictionary,
@@ -80,11 +80,11 @@ export function setTokenHandler<
     ReqQuery = Query,
     Locals extends Record<string, unknown> = Record<string, unknown>,
 >(token: string, handler: TokenHandler<P, ResBody, ReqBody, ReqQuery, Locals> | undefined): TokenHandler | undefined {
-    const result = tokens[token];
+    const result = tokens.get(token);
     if (handler) {
-        tokens[token] = handler as TokenHandler;
+        tokens.set(token, handler as TokenHandler);
     } else {
-        delete tokens[token];
+        tokens.delete(token);
     }
 
     return result;
@@ -124,10 +124,12 @@ export function requestLogger<
 
             let logLine = format.replace(tokenRegex, (_, token: string, param: string | undefined) => {
                 const paramStr = param ? `[${param}]` : '';
-                if (token in tokens) {
-                    const value = tokens[token](req as Request, res as Response, param);
+                const handler = tokens.get(token);
+                if (handler) {
+                    const value = handler(req as Request, res as Response, param);
                     const name = `${token}${paramStr}`;
                     logTokens[name] = value;
+                    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- we need to convert an empty string to `-` as well
                     return value || '-'; // NOSONAR
                 }
 
