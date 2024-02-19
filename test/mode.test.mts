@@ -5,6 +5,7 @@ import { requestLogger } from '../src/index.mjs';
 
 describe('Operation Mode', function () {
     before(beforeSuite);
+
     beforeEach(beforeTest);
 
     it('should work in immediate mode', function () {

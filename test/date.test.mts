@@ -6,6 +6,7 @@ import { requestLogger } from '../src/index.mjs';
 
 describe(':date', function () {
     before(beforeSuite);
+
     beforeEach(function () {
         beforeTest();
         mockDate();

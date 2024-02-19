@@ -7,6 +7,7 @@ import { mockDate, unmockDate } from './helpers/dateproxy.mjs';
 
 describe('RequestLogger', function () {
     before(beforeSuite);
+
     beforeEach(beforeTest);
 
     it('should pass a basic test', function () {
@@ -36,6 +37,7 @@ describe('RequestLogger', function () {
 
     describe('Log Format', function () {
         beforeEach(mockDate);
+
         afterEach(unmockDate);
 
         it('should use default web format', function () {

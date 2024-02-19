@@ -7,6 +7,7 @@ import { requestLogger } from '../src/index.mjs';
 
 describe(':total-time', function () {
     before(beforeSuite);
+
     beforeEach(beforeTest);
 
     it('should log the total time', function () {
