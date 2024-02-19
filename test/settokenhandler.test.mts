@@ -5,6 +5,7 @@ import { requestLogger, setTokenHandler } from '../src/index.mjs';
 
 describe('setTokenHandler', function () {
     before(beforeSuite);
+
     beforeEach(beforeTest);
 
     afterEach(function () {

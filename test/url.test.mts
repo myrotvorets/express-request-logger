@@ -5,6 +5,7 @@ import { requestLogger } from '../src/index.mjs';
 
 describe(':url', function () {
     before(beforeSuite);
+
     beforeEach(beforeTest);
 
     it('should log the url', function () {

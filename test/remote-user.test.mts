@@ -5,6 +5,7 @@ import { requestLogger } from '../src/index.mjs';
 
 describe(':remote-user', function () {
     before(beforeSuite);
+
     beforeEach(beforeTest);
 
     it('should handle the case when authorization header is not available', function () {

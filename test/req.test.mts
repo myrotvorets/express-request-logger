@@ -5,6 +5,7 @@ import { requestLogger } from '../src/index.mjs';
 
 describe(':req', function () {
     before(beforeSuite);
+
     beforeEach(beforeTest);
 
     it('should handle the case when header is not available', function () {
