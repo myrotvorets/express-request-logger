@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-hardcoded-ip */
 import { expect } from 'chai';
 import request from 'supertest';
 import { beforeEach } from 'mocha';
