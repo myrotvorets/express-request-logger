@@ -129,7 +129,7 @@ export function requestLogger<
                     const value = handler(req as Request, res as Response, param);
                     const name = `${token}${paramStr}`;
                     logTokens[name] = value;
-                    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- we need to convert an empty string to `-` as well
+                    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing, sonarjs/prefer-nullish-coalescing -- we need to convert an empty string to `-` as well
                     return value || '-'; // NOSONAR
                 }
 
