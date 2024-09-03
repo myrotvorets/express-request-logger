@@ -1,17 +1,16 @@
-/* eslint-disable sonarjs/no-hardcoded-ip */
-import { expect } from 'chai';
+import { afterEach, before, beforeEach, describe, it } from 'node:test';
+import { equal } from 'node:assert/strict';
 import request from 'supertest';
-import { beforeEach } from 'mocha';
 import { app, beforeSuite, beforeTest, genericHandler, stream } from './helpers/setup.mjs';
 import { requestLogger } from '../src/index.mjs';
 import { mockDate, unmockDate } from './helpers/dateproxy.mjs';
 
-describe('RequestLogger', function () {
+await describe('RequestLogger', async () => {
     before(beforeSuite);
 
     beforeEach(beforeTest);
 
-    it('should pass a basic test', function () {
+    await it('should pass a basic test', async () => {
         app.set('trust proxy', true);
         app.use(
             requestLogger({
@@ -25,43 +24,45 @@ describe('RequestLogger', function () {
         const expectedURL = '/';
         const expectedUA = 'WeirdBot/1.2.4';
 
-        return request(app)
+        await request(app)
             .get(expectedURL)
             .set('X-Forwarded-For', expectedIP)
             .set('User-Agent', expectedUA)
             .expect(() =>
-                expect(stream.toString().trimEnd()).to.equal(
+                equal(
+                    stream.toString().trimEnd(),
                     `LOGGER says: ${expectedIP} 200 GET ${expectedURL} :no-handler :no-handler[too] ${expectedUA}`,
                 ),
             );
     });
 
-    describe('Log Format', function () {
+    await describe('Log Format', async () => {
         beforeEach(mockDate);
 
         afterEach(unmockDate);
 
-        it('should use default web format', function () {
+        await it('should use default web format', async () => {
             app.set('trust proxy', true);
             app.use(requestLogger({ stream }), genericHandler);
 
             const expectedIP = '192.168.1.1';
             const expectedURL = '/';
             const expectedUA = 'WeirdBot/1.2.4';
-            return request(app)
+            await request(app)
                 .get(expectedURL)
                 .set('X-Forwarded-For', expectedIP)
                 .set('User-Agent', expectedUA)
                 .expect(() =>
-                    expect(stream.toString().trimEnd()).to.equal(
+                    equal(
+                        stream.toString().trimEnd(),
                         `${expectedIP} - - [30/Dec/2020:00:00:00 +0000] "GET ${expectedURL} HTTP/1.1" 200 17 "-" "${expectedUA}"`,
                     ),
                 );
         });
     });
 
-    describe('beforeLogHook', function () {
-        it('should be able to modify the log line', function () {
+    await describe('beforeLogHook', async () => {
+        await it('should be able to modify the log line', async () => {
             app.use(
                 requestLogger({
                     format: ':status',
@@ -71,12 +72,12 @@ describe('RequestLogger', function () {
                 genericHandler,
             );
 
-            return request(app)
+            await request(app)
                 .get('/')
-                .expect(() => expect(stream.toString().trimEnd()).to.equal('LOGGER says: 200'));
+                .expect(() => equal(stream.toString().trimEnd(), 'LOGGER says: 200'));
         });
 
-        it('should be able to instruct to skip logging', function () {
+        await it('should be able to instruct to skip logging', async () => {
             app.use(
                 requestLogger({
                     format: ':status',
@@ -86,9 +87,9 @@ describe('RequestLogger', function () {
                 genericHandler,
             );
 
-            return request(app)
+            await request(app)
                 .get('/')
-                .expect(() => expect(stream.toString()).to.equal(''));
+                .expect(() => equal(stream.toString(), ''));
         });
     });
 });

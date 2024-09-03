@@ -1,23 +1,29 @@
-import { expect } from 'chai';
+import { before, beforeEach, describe, it } from 'node:test';
+import { equal } from 'node:assert/strict';
 import request from 'supertest';
+import type { WritableBufferStream } from '@myrotvorets/buffer-stream';
+import type { Express } from 'express';
 import { app, beforeSuite, beforeTest, genericHandler, stream } from './helpers/setup.mjs';
 import { requestLogger } from '../src/index.mjs';
 
-describe(':url', function () {
+await describe(':url', async () => {
     before(beforeSuite);
 
     beforeEach(beforeTest);
 
-    it('should log the url', function () {
+    const checker = (app: Express, stream: WritableBufferStream, expectedURL: string): Promise<unknown> =>
+        request(app)
+            .get(expectedURL)
+            .expect(() => equal(stream.toString().trimEnd(), expectedURL));
+
+    await it('should log the url', () => {
         app.use(requestLogger({ format: ':url', stream }), genericHandler);
 
         const expectedURL = '/';
-        return request(app)
-            .get(expectedURL)
-            .expect(() => expect(stream.toString().trimEnd()).to.equal(expectedURL));
+        return checker(app, stream, expectedURL) as Promise<void>;
     });
 
-    it('should should prefer originalUrl', function () {
+    await it('should should prefer originalUrl', () => {
         app.use(
             requestLogger({
                 format: ':url',
@@ -31,12 +37,10 @@ describe(':url', function () {
         );
 
         const expectedURL = '/bar?baz=quux';
-        return request(app)
-            .get(expectedURL)
-            .expect(() => expect(stream.toString().trimEnd()).to.equal(expectedURL));
+        return checker(app, stream, expectedURL) as Promise<void>;
     });
 
-    it('should should fall back to url', function () {
+    await it('should should fall back to url', () => {
         app.use(
             requestLogger({
                 format: ':url',
@@ -50,8 +54,6 @@ describe(':url', function () {
         );
 
         const expectedURL = '/bar?baz=foo';
-        return request(app)
-            .get(expectedURL)
-            .expect(() => expect(stream.toString().trimEnd()).to.equal(expectedURL));
+        return checker(app, stream, expectedURL) as Promise<void>;
     });
 });

@@ -1,49 +1,54 @@
-import { expect } from 'chai';
+import { before, beforeEach, describe, it } from 'node:test';
+import { equal } from 'node:assert/strict';
 import request from 'supertest';
+import type { WritableBufferStream } from '@myrotvorets/buffer-stream';
 import { app, beforeSuite, beforeTest, genericHandler, stream } from './helpers/setup.mjs';
 import { requestLogger } from '../src/index.mjs';
 
-describe(':req', function () {
+await describe(':req', async () => {
     before(beforeSuite);
 
     beforeEach(beforeTest);
 
-    it('should handle the case when header is not available', function () {
+    const checker = (stream: WritableBufferStream, expected: string): unknown =>
+        equal(stream.toString().trimEnd(), expected);
+
+    await it('should handle the case when header is not available', async () => {
         app.use(requestLogger({ format: ':req[x-ping]', stream }), genericHandler);
 
-        return request(app)
+        await request(app)
             .get('/')
-            .expect(() => expect(stream.toString().trimEnd()).to.equal('-'));
+            .expect(() => checker(stream, '-'));
     });
 
-    it('should handle the case with no parameters', function () {
+    await it('should handle the case with no parameters', async () => {
         app.use(requestLogger({ format: ':req', stream }), genericHandler);
 
-        return request(app)
+        await request(app)
             .get('/')
-            .expect(() => expect(stream.toString().trimEnd()).to.equal('-'));
+            .expect(() => checker(stream, '-'));
     });
 
-    it('should handle the case when header is available', function () {
+    await it('should handle the case when header is available', async () => {
         app.use(requestLogger({ format: ':req[x-ping]', stream }), genericHandler);
 
         const expected = 'pong';
-        return request(app)
+        await request(app)
             .get('/')
             .set('x-ping', expected)
-            .expect(() => expect(stream.toString().trimEnd()).to.equal(expected));
+            .expect(() => checker(stream, expected));
     });
 
-    it('should handle the case when header is available, but empty', function () {
+    await it('should handle the case when header is available, but empty', async () => {
         app.use(requestLogger({ format: ':req[x-ping]', stream }), genericHandler);
 
-        return request(app)
+        await request(app)
             .get('/')
             .set('x-ping', '')
-            .expect(() => expect(stream.toString().trimEnd()).to.equal('-'));
+            .expect(() => checker(stream, '-'));
     });
 
-    it('should handle the case when header is available, but array', function () {
+    await it('should handle the case when header is available, but array', async () => {
         app.use(
             requestLogger({ format: ':req[x-ping]', stream }),
             (req, _res, next) => {
@@ -53,8 +58,8 @@ describe(':req', function () {
             genericHandler,
         );
 
-        return request(app)
+        await request(app)
             .get('/')
-            .expect(() => expect(stream.toString().trimEnd()).to.equal('pong, pong'));
+            .expect(() => checker(stream, 'pong, pong'));
     });
 });
