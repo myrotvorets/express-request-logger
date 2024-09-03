@@ -1,14 +1,27 @@
-import { expect } from 'chai';
+import { before, beforeEach, describe, it } from 'node:test';
+import { equal } from 'node:assert/strict';
 import request from 'supertest';
+import type { WritableBufferStream } from '@myrotvorets/buffer-stream';
+import type { Express } from 'express';
 import { app, beforeSuite, beforeTest, genericHandler, stream } from './helpers/setup.mjs';
 import { requestLogger } from '../src/index.mjs';
 
-describe('Operation Mode', function () {
+await describe('Operation Mode', async () => {
     before(beforeSuite);
 
     beforeEach(beforeTest);
 
-    it('should work in immediate mode', function () {
+    const checker = (
+        app: Express,
+        stream: WritableBufferStream,
+        expectedURL: string,
+        expected: string,
+    ): Promise<unknown> =>
+        request(app)
+            .get(expectedURL)
+            .expect(() => equal(stream.toString().trimEnd(), expected));
+
+    await it('should work in immediate mode', () => {
         app.use(
             requestLogger({
                 format: ':status :method :url :res[content-type]',
@@ -19,12 +32,11 @@ describe('Operation Mode', function () {
         );
 
         const expectedURL = '/';
-        return request(app)
-            .get(expectedURL)
-            .expect(() => expect(stream.toString().trimEnd()).to.equal(`- GET ${expectedURL} -`));
+        const expected = `- GET ${expectedURL} -`;
+        return checker(app, stream, expectedURL, expected) as Promise<void>;
     });
 
-    it('should work in audit mode', function () {
+    await it('should work in audit mode', () => {
         app.use(
             requestLogger({
                 format: ':status :method :url :res[content-type]',
@@ -35,12 +47,7 @@ describe('Operation Mode', function () {
         );
 
         const expectedURL = '/';
-        return request(app)
-            .get(expectedURL)
-            .expect(() =>
-                expect(stream.toString().trimEnd()).to.equal(
-                    `- GET ${expectedURL} -\n200 GET ${expectedURL} application/json; charset=utf-8`,
-                ),
-            );
+        const expected = `- GET ${expectedURL} -\n200 GET ${expectedURL} application/json; charset=utf-8`;
+        return checker(app, stream, expectedURL, expected) as Promise<void>;
     });
 });

@@ -3,13 +3,21 @@
     "project": ["./tsconfig.json"],
     "sourceType": "module"
   },
+  "reportUnusedDisableDirectives": true,
   "extends": [
-    "@myrotvorets/myrotvorets-ts",
-    "plugin:mocha/recommended"
+    "@myrotvorets/myrotvorets-ts"
+  ],
+  "overrides": [
+    {
+      "files": ["test/**.mts"],
+      "rules": {
+        "sonarjs/assertions-in-tests": "off",
+        "sonarjs/no-hardcoded-ip": "off"
+      }
+    }
   ],
   "env": {
     "es2022": true,
-    "mocha": true,
     "node": true
   }
 }

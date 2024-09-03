@@ -1,29 +1,34 @@
+import { before, beforeEach, describe, it } from 'node:test';
+import { equal, match } from 'node:assert/strict';
 import { hrtime } from 'node:process';
-import { expect } from 'chai';
 import request from 'supertest';
 import type { Response } from 'express';
 import { app, beforeSuite, beforeTest, genericHandler, stream } from './helpers/setup.mjs';
 import { requestLogger } from '../src/index.mjs';
 
-describe(':total-time', function () {
+function within<T>(value: T, min: T, max: T): boolean {
+    return value >= min && value <= max;
+}
+
+await describe(':total-time', async () => {
     before(beforeSuite);
 
     beforeEach(beforeTest);
 
-    it('should log the total time', function () {
+    await it('should log the total time', async () => {
         app.use(requestLogger({ format: ':total-time', stream }), genericHandler);
 
-        return request(app)
+        await request(app)
             .get('/')
             .expect(() => {
                 const line = stream.toString().trimEnd();
                 const tokens = line.split(' ');
-                expect(tokens).to.have.lengthOf(1);
-                expect(tokens[0]).to.match(/^\d+\.\d{3}$/u);
+                equal(tokens.length, 1);
+                match(tokens[0]!, /^\d+\.\d{3}$/u);
             });
     });
 
-    it('request time should look plausible', function () {
+    await it('request time should look plausible', async () => {
         const timeout = 20;
         app.use(
             requestLogger({
@@ -35,35 +40,34 @@ describe(':total-time', function () {
         );
 
         const now = hrtime.bigint();
-        return request(app)
+        await request(app)
             .get('/')
             .expect(() => {
                 const duration = +Number((hrtime.bigint() - now) / BigInt(1e6)).toFixed(3);
                 const log = +stream.toString().trimEnd();
-                expect(log).to.be.within(timeout - 10, duration);
+                equal(within(log, timeout, duration), true);
             });
     });
 
-    it('should handle the case when start time is not available', function () {
+    await it('should handle the case when start time is not available', async () => {
         app.use(
             requestLogger({
                 format: ':total-time',
                 stream,
             }),
             (_req, res, next) => {
-                // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
                 delete (res as Response).locals['_hrl_start_time'];
                 next();
             },
             genericHandler,
         );
 
-        return request(app)
+        await request(app)
             .get('/')
-            .expect(() => expect(stream.toString().trimEnd()).to.equal('-'));
+            .expect(() => equal(stream.toString().trimEnd(), '-'));
     });
 
-    it('should handle the case when start time is borked', function () {
+    await it('should handle the case when start time is borked', async () => {
         app.use(
             requestLogger({
                 format: ':total-time',
@@ -76,8 +80,8 @@ describe(':total-time', function () {
             genericHandler,
         );
 
-        return request(app)
+        await request(app)
             .get('/')
-            .expect(() => expect(stream.toString().trimEnd()).to.equal('-'));
+            .expect(() => equal(stream.toString().trimEnd(), '-'));
     });
 });

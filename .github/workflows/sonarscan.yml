@@ -51,7 +51,7 @@ jobs:
         uses: myrotvorets/composite-actions/node-sonarscan@master
         with:
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-          test-script: 'test:coverage'
+          test-script: 'test:sonarqube'
 
       - name: Rebuild the project with sourcemaps
         run: npm run build -- --sourcemap

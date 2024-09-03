@@ -1,22 +1,28 @@
-import { expect } from 'chai';
+import { before, beforeEach, describe, it } from 'node:test';
+import { equal } from 'node:assert/strict';
 import request from 'supertest';
+import type { WritableBufferStream } from '@myrotvorets/buffer-stream';
+import type { Express } from 'express';
 import { app, beforeSuite, beforeTest, genericHandler, stream } from './helpers/setup.mjs';
 import { requestLogger } from '../src/index.mjs';
 
-describe(':remote-user', function () {
+await describe(':remote-user', async () => {
     before(beforeSuite);
 
     beforeEach(beforeTest);
 
-    it('should handle the case when authorization header is not available', function () {
+    const checker = (app: Express, stream: WritableBufferStream, expected: string): Promise<unknown> =>
+        request(app)
+            .get('/')
+            .expect(() => equal(stream.toString().trimEnd(), expected));
+
+    await it('should handle the case when authorization header is not available', () => {
         app.use(requestLogger({ format: ':remote-user', stream }), genericHandler);
 
-        return request(app)
-            .get('/')
-            .expect(() => expect(stream.toString().trimEnd()).to.equal('-'));
+        return checker(app, stream, '-') as Promise<void>;
     });
 
-    it('should handle the case when authorization header is malformed', function () {
+    await it('should handle the case when authorization header is malformed', () => {
         app.use(
             requestLogger({ format: ':remote-user', stream }),
             (req, _res, next) => {
@@ -26,12 +32,10 @@ describe(':remote-user', function () {
             genericHandler,
         );
 
-        return request(app)
-            .get('/')
-            .expect(() => expect(stream.toString().trimEnd()).to.equal('-'));
+        return checker(app, stream, '-') as Promise<void>;
     });
 
-    it('should handle a valid basic authorization header', function () {
+    await it('should handle a valid basic authorization header', () => {
         app.use(
             requestLogger({ format: ':remote-user', stream }),
             (req, _res, next) => {
@@ -41,8 +45,6 @@ describe(':remote-user', function () {
             genericHandler,
         );
 
-        return request(app)
-            .get('/')
-            .expect(() => expect(stream.toString().trimEnd()).to.equal('test'));
+        return checker(app, stream, 'test') as Promise<void>;
     });
 });
