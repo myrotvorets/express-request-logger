@@ -1,7 +1,7 @@
 {
   "name": "@myrotvorets/express-request-logger",
   "description": "HTTP request logger middleware for Express",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "type": "module",
   "typings": "./dist/src/index.d.mts",
   "exports": "./dist/src/index.mjs",
