@@ -1,5 +1,6 @@
 import { before, beforeEach, describe, it } from 'node:test';
 import { equal } from 'node:assert/strict';
+import type { RequestListener } from 'node:http';
 import request from 'supertest';
 import type { WritableBufferStream } from '@myrotvorets/buffer-stream';
 import type { Express } from 'express';
@@ -12,7 +13,7 @@ await describe(':url', async () => {
     beforeEach(beforeTest);
 
     const checker = (app: Express, stream: WritableBufferStream, expectedURL: string): Promise<unknown> =>
-        request(app)
+        request(app as RequestListener)
             .get(expectedURL)
             .expect(() => equal(stream.toString().trimEnd(), expectedURL));
 

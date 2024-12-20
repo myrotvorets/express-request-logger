@@ -1,5 +1,6 @@
 import { afterEach, before, beforeEach, describe, it } from 'node:test';
 import { equal } from 'node:assert/strict';
+import type { RequestListener } from 'node:http';
 import request from 'supertest';
 import { app, beforeSuite, beforeTest, genericHandler, stream } from './helpers/setup.mjs';
 import { requestLogger } from '../src/index.mjs';
@@ -24,7 +25,7 @@ await describe('RequestLogger', async () => {
         const expectedURL = '/';
         const expectedUA = 'WeirdBot/1.2.4';
 
-        await request(app)
+        await request(app as RequestListener)
             .get(expectedURL)
             .set('X-Forwarded-For', expectedIP)
             .set('User-Agent', expectedUA)
@@ -48,7 +49,7 @@ await describe('RequestLogger', async () => {
             const expectedIP = '192.168.1.1';
             const expectedURL = '/';
             const expectedUA = 'WeirdBot/1.2.4';
-            await request(app)
+            await request(app as RequestListener)
                 .get(expectedURL)
                 .set('X-Forwarded-For', expectedIP)
                 .set('User-Agent', expectedUA)
@@ -72,7 +73,7 @@ await describe('RequestLogger', async () => {
                 genericHandler,
             );
 
-            await request(app)
+            await request(app as RequestListener)
                 .get('/')
                 .expect(() => equal(stream.toString().trimEnd(), 'LOGGER says: 200'));
         });
@@ -87,7 +88,7 @@ await describe('RequestLogger', async () => {
                 genericHandler,
             );
 
-            await request(app)
+            await request(app as RequestListener)
                 .get('/')
                 .expect(() => equal(stream.toString(), ''));
         });

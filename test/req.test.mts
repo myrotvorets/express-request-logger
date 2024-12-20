@@ -1,5 +1,6 @@
 import { before, beforeEach, describe, it } from 'node:test';
 import { equal } from 'node:assert/strict';
+import type { RequestListener } from 'node:http';
 import request from 'supertest';
 import type { WritableBufferStream } from '@myrotvorets/buffer-stream';
 import { app, beforeSuite, beforeTest, genericHandler, stream } from './helpers/setup.mjs';
@@ -16,7 +17,7 @@ await describe(':req', async () => {
     await it('should handle the case when header is not available', async () => {
         app.use(requestLogger({ format: ':req[x-ping]', stream }), genericHandler);
 
-        await request(app)
+        await request(app as RequestListener)
             .get('/')
             .expect(() => checker(stream, '-'));
     });
@@ -24,7 +25,7 @@ await describe(':req', async () => {
     await it('should handle the case with no parameters', async () => {
         app.use(requestLogger({ format: ':req', stream }), genericHandler);
 
-        await request(app)
+        await request(app as RequestListener)
             .get('/')
             .expect(() => checker(stream, '-'));
     });
@@ -33,7 +34,7 @@ await describe(':req', async () => {
         app.use(requestLogger({ format: ':req[x-ping]', stream }), genericHandler);
 
         const expected = 'pong';
-        await request(app)
+        await request(app as RequestListener)
             .get('/')
             .set('x-ping', expected)
             .expect(() => checker(stream, expected));
@@ -42,7 +43,7 @@ await describe(':req', async () => {
     await it('should handle the case when header is available, but empty', async () => {
         app.use(requestLogger({ format: ':req[x-ping]', stream }), genericHandler);
 
-        await request(app)
+        await request(app as RequestListener)
             .get('/')
             .set('x-ping', '')
             .expect(() => checker(stream, '-'));
@@ -58,7 +59,7 @@ await describe(':req', async () => {
             genericHandler,
         );
 
-        await request(app)
+        await request(app as RequestListener)
             .get('/')
             .expect(() => checker(stream, 'pong, pong'));
     });
