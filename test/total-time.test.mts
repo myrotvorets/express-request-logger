@@ -30,7 +30,7 @@ await describe(':total-time', async () => {
     });
 
     await it('request time should look plausible', async () => {
-        const timeout = 20;
+        const timeout = 30;
         app.use(
             requestLogger({
                 format: ':total-time',
