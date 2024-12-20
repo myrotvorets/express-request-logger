@@ -1,5 +1,6 @@
 import { afterEach, before, beforeEach, describe, it } from 'node:test';
 import { equal } from 'node:assert/strict';
+import type { RequestListener } from 'node:http';
 import request from 'supertest';
 import type { WritableBufferStream } from '@myrotvorets/buffer-stream';
 import type { Express } from 'express';
@@ -14,7 +15,7 @@ await describe('setTokenHandler', async () => {
     afterEach(() => setTokenHandler('test', undefined));
 
     const checker = (app: Express, stream: WritableBufferStream, expected: string): Promise<unknown> =>
-        request(app)
+        request(app as RequestListener)
             .get('/')
             .expect(() => equal(stream.toString().trimEnd(), expected));
 

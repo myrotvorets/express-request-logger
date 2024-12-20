@@ -1,5 +1,6 @@
 import { before, beforeEach, describe, it } from 'node:test';
 import { equal, match } from 'node:assert/strict';
+import type { RequestListener } from 'node:http';
 import { hrtime } from 'node:process';
 import request from 'supertest';
 import type { Response } from 'express';
@@ -18,7 +19,7 @@ await describe(':total-time', async () => {
     await it('should log the total time', async () => {
         app.use(requestLogger({ format: ':total-time', stream }), genericHandler);
 
-        await request(app)
+        await request(app as RequestListener)
             .get('/')
             .expect(() => {
                 const line = stream.toString().trimEnd();
@@ -35,12 +36,14 @@ await describe(':total-time', async () => {
                 format: ':total-time',
                 stream,
             }),
-            (_req, _res, next) => setTimeout(next, timeout),
+            (_req, _res, next) => {
+                setTimeout(next, timeout);
+            },
             genericHandler,
         );
 
         const now = hrtime.bigint();
-        await request(app)
+        await request(app as RequestListener)
             .get('/')
             .expect(() => {
                 const duration = +Number((hrtime.bigint() - now) / BigInt(1e6)).toFixed(3);
@@ -62,7 +65,7 @@ await describe(':total-time', async () => {
             genericHandler,
         );
 
-        await request(app)
+        await request(app as RequestListener)
             .get('/')
             .expect(() => equal(stream.toString().trimEnd(), '-'));
     });
@@ -80,7 +83,7 @@ await describe(':total-time', async () => {
             genericHandler,
         );
 
-        await request(app)
+        await request(app as RequestListener)
             .get('/')
             .expect(() => equal(stream.toString().trimEnd(), '-'));
     });
