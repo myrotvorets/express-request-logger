@@ -28,18 +28,6 @@ jobs:
           - { name: LTS,          version: lts/* }
           - { name: Previous LTS, version: lts/-1 }
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
-        with:
-          disable-sudo: true
-          egress-policy: block
-          allowed-endpoints: >
-            api.github.com:443
-            github.com:443
-            objects.githubusercontent.com:443
-            nodejs.org:443
-            registry.npmjs.org:443
-
       - name: Build and test
         uses: myrotvorets/composite-actions/build-test-nodejs@461a45375fc25e72215339dad366374fdb3f08d6
         with:
