@@ -21,7 +21,7 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
     steps:
       - name: Run SonarCloud analysis
-        uses: myrotvorets/composite-actions/node-sonarscan@3979e6120a77babddec6e34f9008f4ed8d611c61
+        uses: myrotvorets/composite-actions/node-sonarscan@c2f2ef855b626c801b87bf3297b4a3b34f378489
         with:
           sonar-token: ${{ secrets.SONAR_TOKEN }}
           test-script: 'test:sonarqube'
